@@ -2006,6 +2006,9 @@
       !wghtns(2) = cp67 + (cp78-cp67)*(c1-fnidr)
       wghtns(3) = c1 - wghtns(2)
       call mpas_log_write("JPT This code is being read")
+      write(warnstr,*) subname, 'nir_wght_dir', &
+           nir_wght_dir
+      call icepack_warnings_add(warnstr)
 
       ! find snow grain adjustment factor, dependent upon clear/overcast sky
       ! estimate. comparisons with SNICAR show better agreement with DE when
