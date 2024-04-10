@@ -68,6 +68,7 @@
       use icepack_orbital,    only: compute_coszen
       use icepack_warnings,   only: warnstr, icepack_warnings_add
       use icepack_warnings,   only: icepack_warnings_setabort, icepack_warnings_aborted
+      use mpas_log, only: mpas_log_write
 
       ! dEdd 3-band data
       use icepack_shortwave_data, only: &
@@ -856,6 +857,7 @@
                           sec,                 &
                           swvdr,    swvdf,     &
                           swidr,    swidf,     &
+                          nir_wght_dir,        & !JPT
                           coszen,   fsnow,     &
                           alvdrn,   alvdfn,    &
                           alidrn,   alidfn,    &
@@ -898,6 +900,7 @@
          swvdf, & ! sw down, visible, diffuse (W/m^2)
          swidr, & ! sw down, near IR, direct  (W/m^2)
          swidf, & ! sw down, near IR, diffuse (W/m^2)
+         nir_wght_dir, & ! NIR weight direct (1) JPT
          fsnow    ! snowfall rate (kg/m^2 s)
 
       real(kind=dbl_kind), dimension(:), intent(in) :: &
@@ -1173,6 +1176,7 @@
                              aeron(:,n),                    &
                              swvdr,         swvdf,          &
                              swidr,         swidf,          &
+                             nir_wght_dir,                  & !JPT
                              alvdrn(n),     alvdfn(n),      &
                              alidrn(n),     alidfn(n),      &
                              fswsfcn(n),    fswintn(n),     &
@@ -1245,6 +1249,7 @@
                                   aero,                  &
                                   swvdr,    swvdf,       &
                                   swidr,    swidf,       &
+                                  nir_wght_dir,          & !JPT
                                   alvdr,    alvdf,       &
                                   alidr,    alidf,       &
                                   fswsfc,   fswint,      &
@@ -1257,7 +1262,7 @@
                                   Iswabs,   albice,      &
                                   albsno,   albpnd,      &
                                   fswpenl,  zbio,        &
-                                  l_print_point )
+                                  l_print_point)
 
       real (kind=dbl_kind), intent(in) :: &
          aice    , & ! concentration of ice
@@ -1277,7 +1282,8 @@
          swvdr   , & ! sw down, visible, direct  (W/m^2)
          swvdf   , & ! sw down, visible, diffuse (W/m^2)
          swidr   , & ! sw down, near IR, direct  (W/m^2)
-         swidf       ! sw down, near IR, diffuse (W/m^2)
+         swidf   , &   ! sw down, near IR, diffuse (W/m^2)
+         nir_wght_dir  ! NIR weight used to split NIR band, direct (1) JPT
 
       real (kind=dbl_kind), intent(inout) :: &
          coszen  , & ! cosine of solar zenith angle
@@ -1424,13 +1430,13 @@
                srftyp = 0
                call compute_dEdd_3bd( &
                       klev,   klevp,   zbio,   fnidr,  coszen,  &
-                      swvdr,  swvdf,   swidr,  swidf,  srftyp,  &
+                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir, srftyp,  &
                       hstmp,  rhosnw,  rsnw,   hi,     hp,      &
                       fi,     aero_mp, avdrl,  avdfl,           &
                       aidrl,  aidfl,   fswsfc, fswint, fswthru, &
                       fswthru_vdr,     fswthru_vdf,             &
                       fswthru_idr,     fswthru_idf,             &
-                      Sswabs, Iswabs,  fswpenl )
+                      Sswabs, Iswabs,  fswpenl ) !JPT add NIR weight
                if (icepack_warnings_aborted(subname)) return
 
                alvdr = alvdr + avdrl*fi
@@ -1468,7 +1474,7 @@
 !echmod - this can be combined with the 5bd call above, if we use module data
                   call compute_dEdd_3bd(                        &
                       klev,   klevp,   zbio,   fnidr,  coszen,  &
-                      swvdr,  swvdf,   swidr,  swidf,  srftyp,  &
+                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir,  srftyp,  &
                       hs,     rhosnw,  rsnw,   hi,     hp,      &
                       fs,     aero_mp, avdrl,  avdfl,           &
                       aidrl,  aidfl,   fswsfc, fswint, fswthru, &
@@ -1505,7 +1511,7 @@
                srftyp = 2
                call compute_dEdd_3bd(                           &
                       klev,   klevp,   zbio,   fnidr,  coszen,  &
-                      swvdr,  swvdf,   swidr,  swidf,  srftyp,  &
+                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir,  srftyp,  &
                       hs,     rhosnw,  rsnw,   hi,     hp,      &
                       fp,     aero_mp, avdrl,  avdfl,           &
                       aidrl,  aidfl,   fswsfc, fswint, fswthru, &
@@ -1612,16 +1618,17 @@
 ! author:  Bruce P. Briegleb, NCAR
 !   2013:  E Hunke merged with NCAR version
 !   2022:  E Hunke, T Craig moved data (now module data)
+!   2024:  JPT, Add NIR weight split from EAM       
 
       subroutine compute_dEdd_3bd(                           &
                       klev,   klevp,   zbio,   fnidr,  coszen,  &
-                      swvdr,  swvdf,   swidr,  swidf,  srftyp,  &
+                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir,  srftyp,  &
                       hs,     rhosnw,  rsnw,   hi,     hp,      &
                       fi,     aero_mp, alvdr,  alvdf,           &
                       alidr,  alidf,   fswsfc, fswint, fswthru, &
                       fswthru_vdr,     fswthru_vdf,             &
                       fswthru_idr,     fswthru_idf,             &
-                      Sswabs, Iswabs,  fswpenl )
+                      Sswabs, Iswabs,  fswpenl)
 
       integer (kind=int_kind), intent(in) :: &
          klev  , & ! number of radiation layers - 1
@@ -1634,7 +1641,8 @@
          swvdr , & ! shortwave down at surface, visible, direct  (W/m^2)
          swvdf , & ! shortwave down at surface, visible, diffuse (W/m^2)
          swidr , & ! shortwave down at surface, near IR, direct  (W/m^2)
-         swidf     ! shortwave down at surface, near IR, diffuse (W/m^2)
+         swidf , & ! shortwave down at surface, near IR, diffuse (W/m^2)
+         nir_wght_dir  ! NIR weight used to split NIR band, direct (1) JPT 
 
       integer (kind=int_kind), intent(in) :: &
          srftyp    ! surface type over ice: (0=air, 1=snow, 2=pond)
@@ -1989,9 +1997,14 @@
       ! near-infrared solar (0.7-5.0 micro-meter) which indicates clear/cloudy
       ! conditions: more cloud, the less 1.19-5.0 relative to the
       ! 0.7-1.19 micro-meter due to cloud absorption.
+      ! JPT: Change to weights constructed from the amtosphere- now coupled to icepack
+      ! 03/2024 Code currently set to use same weight for direct and diffuse
+      ! Lets change that in the future.
       wghtns(1) = c1
-      wghtns(2) = cp67 + (cp78-cp67)*(c1-fnidr)
+      wghtns(2) = nir_wght_dir                   
+      !wghtns(2) = cp67 + (cp78-cp67)*(c1-fnidr)
       wghtns(3) = c1 - wghtns(2)
+      call mpas_log_write("JPT This code is being read")
 
       ! find snow grain adjustment factor, dependent upon clear/overcast sky
       ! estimate. comparisons with SNICAR show better agreement with DE when
@@ -3720,6 +3733,7 @@
                                         yday,     sec,       &
                                         swvdr,    swvdf,     &
                                         swidr,    swidf,     &
+                                        nir_wght_dir,        & !JPT
                                         coszen,   fsnow,     &
                                         alvdrn,   alvdfn,    &
                                         alidrn,   alidfn,    &
@@ -3745,6 +3759,7 @@
          swvdf     , & ! sw down, visible, diffuse (W/m^2)
          swidr     , & ! sw down, near IR, direct  (W/m^2)
          swidf     , & ! sw down, near IR, diffuse (W/m^2)
+         nir_wght_dir, & ! JPT NIR weight, direct (1)
          fsnow     , & ! snowfall rate (kg/m^2 s)
          TLAT, TLON    ! latitude and longitude (radian)
 
@@ -3908,6 +3923,7 @@
                           sec,          &
                           swvdr,        swvdf,          &
                           swidr,        swidf,          &
+                          nir_wght_dir,                 & !JPT
                           coszen,       fsnow,          &
                           alvdrn,       alvdfn,         &
                           alidrn,       alidfn,         &
@@ -3928,7 +3944,7 @@
                           dhsn=dhsn,                    &
                           ffracn=ffracn,                &
                           rsnow=rsnow,                  &
-                          l_print_point=l_print_point,  &
+                          l_print_point=l_print_point,  &                        
                           initonly=initonly)
             if (icepack_warnings_aborted(subname)) return
 
