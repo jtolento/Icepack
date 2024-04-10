@@ -99,6 +99,7 @@
          swvdf   , & ! sw down, visible, diffuse (W/m^2)
          swidr   , & ! sw down, near IR, direct  (W/m^2)
          swidf   , & ! sw down, near IR, diffuse (W/m^2)
+         nir_wght_dir   , & ! JPT NIR weight split (1)
          flw         ! incoming longwave radiation (W/m^2)
 
        ! in from atmosphere (if .not. calc_Tsfc)
@@ -430,6 +431,7 @@
          swvdf (:) = c0              ! shortwave radiation (W/m^2)
          swidr (:) = c0              ! shortwave radiation (W/m^2)
          swidf (:) = c0              ! shortwave radiation (W/m^2)
+         !nir_wght_dir = c0           !JPT NIR weight direct (1)
          flw   (:) = c180            ! incoming longwave rad (W/m^2)
          frain (:) = c0              ! rainfall rate (kg/m2/s)
          do n = 1, ncat              ! conductive heat flux (W/m^2)

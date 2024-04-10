@@ -40,7 +40,7 @@
       subroutine prep_radiation ()
 
       use icedrv_domain_size, only: ncat, nilyr, nslyr, nx
-      use icedrv_flux, only: scale_factor, swvdr, swvdf, swidr, swidf
+      use icedrv_flux, only: scale_factor, swvdr, swvdf, swidr, swidf, nir_wght_dir !JPT
       use icedrv_flux, only: alvdr_ai, alvdf_ai, alidr_ai, alidf_ai
       use icedrv_flux, only: alvdr_init, alvdf_init, alidr_init, alidf_init
       use icedrv_arrays_column, only: fswsfcn, fswintn
@@ -73,6 +73,7 @@
                          aice=aice(i),   aicen=aicen(i,:), &
                          swvdr=swvdr(i), swvdf=swvdf(i),   &
                          swidr=swidr(i), swidf=swidf(i),   &
+                         nir_wght_dir = nir_wght_dir(i),   &!JPT
                          alvdr_ai=alvdr_ai(i), alvdf_ai=alvdf_ai(i), &
                          alidr_ai=alidr_ai(i), alidf_ai=alidf_ai(i), &
                          scale_factor=scale_factor(i),     &
@@ -83,8 +84,7 @@
                          fswthrun_idr=fswthrun_idr(i,:),     &
                          fswthrun_idf=fswthrun_idf(i,:),     &
                          fswpenln=fswpenln(i,:,:),         &
-                         Sswabsn=Sswabsn(i,:,:), Iswabsn=Iswabsn(i,:,:))
-
+                         Sswabsn=Sswabsn(i,:,:), Iswabsn=Iswabsn(i,:,:) )
          enddo               ! i
          call icepack_warnings_flush(nu_diag)
          if (icepack_warnings_aborted()) call icedrv_system_abort(string=subname, &
@@ -1035,7 +1035,7 @@
       use icedrv_arrays_column, only: swgrid, igrid
       use icedrv_calendar, only: yday, sec
       use icedrv_domain_size, only: ncat, n_aero, nilyr, nslyr, n_zaero, n_algae, nblyr, nx
-      use icedrv_flux, only: swvdr, swvdf, swidr, swidf, coszen, fsnow
+      use icedrv_flux, only: swvdr, swvdf, swidr, swidf, coszen, fsnow, nir_wght_dir !JPT
       use icedrv_init, only: TLAT, TLON, tmask
       use icedrv_state, only: aicen, vicen, vsnon, trcrn
 
@@ -1149,6 +1149,7 @@
                          sec=sec,                   yday=yday,          &
                          swvdr=swvdr(i),            swvdf=swvdf(i),           &
                          swidr=swidr(i),            swidf=swidf(i),           &
+                         nir_wght_dir = nir_wght_dir(i),                      &!JPT
                          coszen=coszen(i),          fsnow=fsnow(i),           &
                          alvdrn=alvdrn(i,:),        alvdfn=alvdfn(i,:),       &
                          alidrn=alidrn(i,:),        alidfn=alidfn(i,:),       &

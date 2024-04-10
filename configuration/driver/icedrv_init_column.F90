@@ -105,7 +105,7 @@
       use icedrv_forcing, only: snw_ssp_table
       use icedrv_flux, only: alvdf, alidf, alvdr, alidr
       use icedrv_flux, only: alvdr_ai, alidr_ai, alvdf_ai, alidf_ai
-      use icedrv_flux, only: swvdr, swvdf, swidr, swidf, scale_factor, snowfrac
+      use icedrv_flux, only: swvdr, swvdf, swidr, swidf, scale_factor, snowfrac, nir_wght_dir !JPT
       use icedrv_flux, only: albice, albsno, albpnd, apeff_ai, coszen, fsnow
       use icedrv_init, only: tlat, tlon, tmask
       use icedrv_restart_shared, only: restart
@@ -266,6 +266,7 @@
                          yday=yday, sec=sec,                   &
                          swvdr=swvdr(i),         swvdf=swvdf(i),           &
                          swidr=swidr(i),         swidf=swidf(i),           &
+                         nir_wght_dir = nir_wght_dir(i)                    & !JPT
                          coszen=coszen(i),       fsnow=fsnow(i),           &
                          alvdrn=alvdrn(i,:),     alvdfn=alvdfn(i,:),       &
                          alidrn=alidrn(i,:),     alidfn=alidfn(i,:),       &
