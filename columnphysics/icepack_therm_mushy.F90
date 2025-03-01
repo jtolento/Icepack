@@ -21,6 +21,7 @@
   use icepack_therm_shared, only: ferrmax
   use icepack_warnings, only: warnstr, icepack_warnings_add
   use icepack_warnings, only: icepack_warnings_setabort, icepack_warnings_aborted
+  use mpas_log, only: mpas_log_write
 
   implicit none
 
@@ -2852,6 +2853,14 @@
        cp(i) = c(i) / (b(i) - cp(i-1)*a(i))
     enddo
 
+    !call mpas_log_write("JPT: icepack_therm_mushy_file")
+    !write(warnstr,*) subname, 'd =', &
+    !     d
+    !call icepack_warnings_add(warnstr)
+
+    !write(warnstr,*) subname, 'b =', &
+    !     b
+    !call icepack_warnings_add(warnstr)
     dp(1) = d(1) / b(1)
     do i = 2, n
        dp(i) = (d(i) - dp(i-1)*a(i)) / (b(i) - cp(i-1)*a(i))

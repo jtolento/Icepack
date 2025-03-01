@@ -1430,7 +1430,7 @@
                srftyp = 0
                call compute_dEdd_3bd( &
                       klev,   klevp,   zbio,   fnidr,  coszen,  &
-                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir, srftyp,  &
+                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir, srftyp,   & !+add nir_weight_here after swidf
                       hstmp,  rhosnw,  rsnw,   hi,     hp,      &
                       fi,     aero_mp, avdrl,  avdfl,           &
                       aidrl,  aidfl,   fswsfc, fswint, fswthru, &
@@ -1474,7 +1474,7 @@
 !echmod - this can be combined with the 5bd call above, if we use module data
                   call compute_dEdd_3bd(                        &
                       klev,   klevp,   zbio,   fnidr,  coszen,  &
-                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir,  srftyp,  &
+                      swvdr,  swvdf,   swidr,  swidf,  nir_wght_dir, srftyp,  & !add nir_w here after swidf 
                       hs,     rhosnw,  rsnw,   hi,     hp,      &
                       fs,     aero_mp, avdrl,  avdfl,           &
                       aidrl,  aidfl,   fswsfc, fswint, fswthru, &
@@ -1511,7 +1511,7 @@
                srftyp = 2
                call compute_dEdd_3bd(                           &
                       klev,   klevp,   zbio,   fnidr,  coszen,  &
-                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir,  srftyp,  &
+                      swvdr,  swvdf,   swidr,  swidf,  nir_wght_dir, srftyp,  & !add nir_w here 
                       hs,     rhosnw,  rsnw,   hi,     hp,      &
                       fp,     aero_mp, avdrl,  avdfl,           &
                       aidrl,  aidfl,   fswsfc, fswint, fswthru, &
@@ -1622,7 +1622,7 @@
 
       subroutine compute_dEdd_3bd(                           &
                       klev,   klevp,   zbio,   fnidr,  coszen,  &
-                      swvdr,  swvdf,   swidr,  swidf, nir_wght_dir,  srftyp,  &
+                      swvdr,  swvdf,   swidr,  swidf,  nir_wght_dir, srftyp,  & ! add nir_w here
                       hs,     rhosnw,  rsnw,   hi,     hp,      &
                       fi,     aero_mp, alvdr,  alvdf,           &
                       alidr,  alidf,   fswsfc, fswint, fswthru, &
@@ -2001,13 +2001,13 @@
       ! 03/2024 Code currently set to use same weight for direct and diffuse
       ! Lets change that in the future.
       wghtns(1) = c1
-      wghtns(2) = nir_wght_dir                   
-      !wghtns(2) = cp67 + (cp78-cp67)*(c1-fnidr)
+      !wghtns(2) = nir_wght_dir                   
+      wghtns(2) = cp67 + (cp78-cp67)*(c1-fnidr)
       wghtns(3) = c1 - wghtns(2)
-      call mpas_log_write("JPT This code is being read")
-      write(warnstr,*) subname, 'nir_wght_dir = ', &
-           nir_wght_dir
-      call icepack_warnings_add(warnstr)
+      !call mpas_log_write("JPT This code is being read")
+      !write(warnstr,*) subname, 'nir_wght_dir = ', &
+      !     nir_wght_dir
+      !call icepack_warnings_add(warnstr)
 
       ! find snow grain adjustment factor, dependent upon clear/overcast sky
       ! estimate. comparisons with SNICAR show better agreement with DE when
